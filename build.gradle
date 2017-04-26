@@ -1,0 +1,20 @@
+apply plugin: "java"
+apply plugin: "application"
+
+mainClassName = "by.cs.Main"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile 'junit:junit:4.12'
+    compile group: 'org.eclipse.jetty.aggregate', name: 'jetty-all', version: '9.4.4.v20170414'
+    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
+    compile group: 'org.primefaces', name: 'primefaces', version: '6.1'
+    compile group: 'com.sun.faces', name: 'jsf-api', version: '2.2.4'
+}
+
+jar {
+    manifest.attributes("Main-Class": mainClassName)
+}
