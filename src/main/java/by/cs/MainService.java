@@ -1,6 +1,6 @@
 package by.cs;
 
-import org.eclipse.jetty.server.Server;
+import by.cs.web.StandaloneServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,47 +11,31 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 /**
- * @autor Dmitriy V.Yefremov
+ * Main class for initialize and starting application
+ *
+ * @author Dmitriy V.Yefremov
  */
 public class MainService {
 
-    private Server server;
-    private static final int PORT = 8080;
+    private StandaloneServer server;
+
     private static final Logger logger = LoggerFactory.getLogger(MainService.class);
 
     public MainService () {
 
     }
 
-    /**
-     * Start jetty
-     */
-    public void startServer() {
+    public static void main(String[] args) {
 
-        Thread thread = new Thread(() -> {
-            server = new Server(PORT);
-            try {
-                server.start();
-            } catch (Exception e) {
-                logger.error("MainService error [startServer]: " + e);
-            }
-        });
-
-        thread.setDaemon(true);
-        thread.start();
+        MainService service = new MainService();
+        service.init();
     }
 
-    /**
-     * Stop jetty
-     */
-    public void stopServer() {
-        if (server != null && server.isRunning()) {
-            try {
-                server.stop();
-            } catch (Exception e) {
-                logger.error("MainService error [stopServer]: " + e);
-            }
-        }
+    public void init() {
+
+        getSystemTray();
+        server = StandaloneServer.getInstance();
+        server.startServer();
     }
 
     /**
@@ -59,10 +43,9 @@ public class MainService {
      *
      * @throws IOException
      */
-    public void getSystemTray() {
+    private void getSystemTray() {
 
         if (!SystemTray.isSupported()) {
-            stopServer();
             System.exit(0);
         }
 
@@ -83,7 +66,7 @@ public class MainService {
         trayIcon.addActionListener(ev -> openUri());
         exitItem.addActionListener(e -> {
             tray.remove(trayIcon);
-            stopServer();
+            server.stopServer();
             System.exit(0);
         });
 
@@ -103,12 +86,11 @@ public class MainService {
      */
     private void openUri()  {
         try {
-            Desktop.getDesktop().browse(new URI("http://localhost:" + PORT));
+            Desktop.getDesktop().browse(new URI("http://localhost:" + Constants.DEFAULT_PORT));
         } catch (URISyntaxException e) {
             logger.error("MainService error [openUri]: " + e);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
 }
