@@ -1,8 +1,10 @@
 package by.cs.web;
 
 import by.cs.Constants;
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.util.resource.ResourceCollection;
 import org.eclipse.jetty.util.thread.ScheduledExecutorScheduler;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.slf4j.Logger;
@@ -53,11 +55,17 @@ public class StandaloneServer {
      */
     public void stopServer() {
         if (server != null && server.isRunning()) {
-            try {
-                server.stop();
-            } catch (Exception e) {
-                logger.error("StandaloneServer error [stopServer]: " + e);
-            }
+            new Thread(() -> {
+                try {
+                    for (Handler h : server.getHandlers()) {
+                        h.stop();
+                    }
+                    server.stop();
+                } catch (Exception e) {
+                    logger.error("StandaloneServer error [stopServer]: " + e);
+                }
+                System.exit(0);
+            }).start();
         }
     }
 
@@ -81,7 +89,10 @@ public class StandaloneServer {
         server.addConnector(httpConnector);
 
         final String webDir = this.getClass().getClassLoader().getResource("webapp").toExternalForm();
-        WebAppContext appContext = new WebAppContext(webDir, "");
+        WebAppContext appContext = new AliasAppContext(webDir, "/");
+        appContext.setBaseResource(new ResourceCollection(new String[] { webDir, "./target" }));
+        appContext.setResourceAlias("/WEB-INF/classes/", "/classes/");
+        appContext.setAttribute(Constants.SERVER_REFERENCE, this);
 
         server.setHandler(appContext);
         server.start();

@@ -9,16 +9,16 @@ repositories {
 
 dependencies {
     testCompile 'junit:junit:4.12'
-    compile group: 'org.eclipse.jetty.aggregate', name: 'jetty-all', version: '9.4.4.v20170414'
+    compile group: 'org.eclipse.jetty', name: 'jetty-webapp', version: '9.4.4.v20170414'
+    compile group: 'org.eclipse.jetty', name: 'apache-jsp', version: '9.4.4.v20170414'
     compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
     compile group: 'org.primefaces', name: 'primefaces', version: '6.1'
-    compile group: 'com.sun.faces', name: 'jsf-api', version: '2.2.14'
-    compile group: 'com.sun.faces', name: 'jsf-impl', version: '2.2.14'
+    compile group: 'com.sun.faces', name: 'jsf-api', version: '2.2.7'
+    compile group: 'com.sun.faces', name: 'jsf-impl', version: '2.2.7'
     compile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
-    compile group: 'javax.el', name: 'javax.el-api', version: '3.0.0'
-    compile group: 'org.glassfish', name: 'javax.el', version: '3.0.1-b08'
+    compile group: 'javax.el', name: 'el-api', version: '2.2'
+    compile group: 'org.glassfish.web', name: 'el-impl', version: '2.2'
     compile group: 'jstl', name: 'jstl', version: '1.2'
-    compile group: 'javax.servlet.jsp', name: 'jsp-api', version: '2.2'
 }
 
 jar {

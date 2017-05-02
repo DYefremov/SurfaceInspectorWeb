@@ -58,6 +58,7 @@ public class MainService {
         }
 
         final TrayIcon trayIcon = new TrayIcon(image);
+        trayIcon.setImageAutoSize(true);
         final PopupMenu menu = new PopupMenu();
         final MenuItem openItem = new MenuItem("Open");
         final MenuItem exitItem = new MenuItem("Exit");

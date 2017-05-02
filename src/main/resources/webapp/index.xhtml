@@ -1,10 +1,14 @@
 <!DOCTYPE html >
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://java.sun.com/jsf/core" xmlns:h="http://java.sun.com/jsf/html" xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:h="http://java.sun.com/jsf/html"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:p="http://primefaces.org/ui">
 
 <f:view locale="en" contentType="text/html">
 
 	<h:head>
-		<f:facet name="Test">
+		<f:facet name="test">
 			<meta content='text/html; charset=UTF-8' http-equiv="Content-Type" />
 		</f:facet>
 		<ui:insert name="header">
@@ -14,13 +18,14 @@
 	</h:head>
 
 	<h:body>
-		<h1>Test </h1>
-        <br/>
-        <h:inputText value="test"/>
-        <br/>
-        <h:form>
-            <p:commandButton value="Test" action="#{cpuTest.test}" />
-        </h:form>
+
+		<h1>Test</h1>
+
+		<h:form>
+			<p:growl id="growl" life="2000" />
+			<p:commandButton value="Test" actionListener="#{cpuTest.test}" update="growl" />
+			<p:commandButton value="Shutdown" actionListener="#{serverController.stopService}" ajax="true" async="true"/>
+		</h:form>
 
 	</h:body>
 </f:view>
