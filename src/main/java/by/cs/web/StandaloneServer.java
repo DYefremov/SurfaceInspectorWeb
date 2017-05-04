@@ -57,6 +57,7 @@ public class StandaloneServer {
         if (server != null && server.isRunning()) {
             new Thread(() -> {
                 try {
+                    Thread.sleep(2000);
                     for (Handler h : server.getHandlers()) {
                         h.stop();
                     }

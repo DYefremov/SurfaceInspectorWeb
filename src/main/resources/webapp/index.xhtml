@@ -8,25 +8,68 @@
 <f:view locale="en" contentType="text/html">
 
 	<h:head>
-		<f:facet name="test">
+		<f:facet name="SurfaceInspector">
 			<meta content='text/html; charset=UTF-8' http-equiv="Content-Type" />
 		</f:facet>
 		<ui:insert name="header">
 			<ui:insert name="metadata" />
 		</ui:insert>
-		<title>Test</title>
+		<title>SurfaceInspector</title>
 	</h:head>
 
 	<h:body>
-
-		<h1>Test</h1>
-
 		<h:form>
-			<p:growl id="growl" life="2000" />
-			<p:commandButton value="Test" actionListener="#{cpuTest.test}" update="growl" />
-			<p:commandButton value="Shutdown" actionListener="#{serverController.stopService}" ajax="true" async="true"/>
-		</h:form>
+			<p:layout fullPage="true" >
 
+				<p:layoutUnit position="north" >
+					               <!--For hiding scroll-->
+					<p:toolbar style="overflow:hidden !important">
+						<f:facet name="left">
+							<p:commandButton type="button" value="Start service" icon="ui-icon-start" />
+						</f:facet>
+
+						<f:facet name="right">
+							<p:commandButton value="Stop service" actionListener="#{serverController.stopService}" ajax="false" icon="ui-icon-close" />
+						</f:facet>
+
+					</p:toolbar>
+				</p:layoutUnit>
+
+				<p:layoutUnit position="south" size="100" header="Logs" resizable="true" closable="false" collapsible="true">
+
+					<h:outputText id="logs" value="There will be logs!"  widgetVar="logConsole" />
+
+				</p:layoutUnit>
+
+				<p:layoutUnit position="west" style="min-width:350px;" header="Camera" resizable="true" closable="false" collapsible="true">
+					<h:form>
+						<h:panelGrid columns="1" cellpadding="5">
+							<p:photoCam widgetVar="pc" listener="#{serverController.onCapture}" />
+						</h:panelGrid>
+						<h:panelGrid columns="2" cellpadding="5">
+							<h:column>
+								<p:commandButton type="button" value="Capture" onclick="PF('pc').capture()"/>
+							</h:column>
+							<h:column>
+								<p:commandButton value="Deactivate" onclick="PF('pc').deactivate()"/>
+							</h:column>
+						</h:panelGrid>
+					</h:form>
+				</p:layoutUnit>
+
+				<p:layoutUnit position="east" size="200" header="Cpu" resizable="true" closable="false" collapsible="true" >
+					<p:growl id="growl" life="2000" />
+					<p:commandButton value="Test" actionListener="#{cpuTest.test}" update="growl" />
+					<p:commandButton value="Shutdown" actionListener="#{serverController.stopService}" ajax="true" async="true"/>
+				</p:layoutUnit>
+
+				<p:layoutUnit position="center" header="Chart">
+					<p:chart type="bar" model="#{serverController.model}" style="height:300px"/>
+				</p:layoutUnit>
+
+			</p:layout>
+		</h:form>
 	</h:body>
+
 </f:view>
 </html>
