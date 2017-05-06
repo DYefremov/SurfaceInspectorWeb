@@ -8,7 +8,6 @@ import org.primefaces.model.chart.Axis;
 import org.primefaces.model.chart.AxisType;
 import org.primefaces.model.chart.BarChartModel;
 import org.primefaces.model.chart.ChartSeries;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.faces.FacesException;

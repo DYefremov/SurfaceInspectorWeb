@@ -7,8 +7,7 @@ import javax.faces.bean.RequestScoped;
 import javax.faces.context.FacesContext;
 import java.io.Serializable;
 
-@ManagedBean(name="cpuTest" , eager = true)
-@RequestScoped
+@ManagedBean(name = "cpuTest" , eager = true)
 public class CpuTest implements Serializable {
 
 	public CpuTest() {
