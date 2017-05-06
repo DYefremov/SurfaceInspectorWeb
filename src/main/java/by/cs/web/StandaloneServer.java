@@ -7,6 +7,7 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.util.resource.ResourceCollection;
 import org.eclipse.jetty.util.thread.ScheduledExecutorScheduler;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,6 +97,9 @@ public class StandaloneServer {
         appContext.setAttribute(Constants.SERVER_REFERENCE, this);
 
         server.setHandler(appContext);
+        //For configure websockets (Atmosphere!)
+        WebSocketServerContainerInitializer.configureContext(appContext);
+
         server.start();
         server.join();
     }

@@ -38,12 +38,18 @@
 				</p:layoutUnit>
 
 				<p:layoutUnit position="west" style="min-width:350px;" header="Camera" resizable="true" closable="false" collapsible="true">
-					<h:form id="camform">
+					<h:form>
 						<h:panelGrid columns="1" cellpadding="5">
-							<h:form id="cam" >
+
+							<h:form id="camform">
+								<h:outputText id="cam" value="Counter value #{camController.count}" />
 								<!--<p:photoCam widgetVar="pc" listener="#{serverController.onCapture}" />-->
-								<p:graphicImage value="#{camController.content}" />
+								<p:graphicImage value="#{camController.content}" cache="false" />
 							</h:form>
+							<!--Push !!!!!!!-->
+							<p:socket channel="/updateCam">
+								<p:ajax event="message" update="camform:cam"/>
+							</p:socket>
 						</h:panelGrid>
 						<h:panelGrid columns="2" cellpadding="5">
 							<p:outputLabel for="cams" value="Available cameras: " />
@@ -60,10 +66,7 @@
 							</h:column>
 						</h:panelGrid>
 					</h:form>
-					<!--Push !!!!!!!-->
-					<p:socket channel="/updateCam">
-						<p:ajax event="message" update="camform:cam"/>
-					</p:socket>
+
 				</p:layoutUnit>
 
 				<p:layoutUnit position="east" size="200" header="Cpu" resizable="true" closable="false" collapsible="true" >

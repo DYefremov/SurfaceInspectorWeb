@@ -58,16 +58,33 @@
 	    <url-pattern>*.xhtml</url-pattern>
 	 </servlet-mapping>
 	<!--PrimeFaces Push-->
-	<!--<servlet>-->
-		<!--<servlet-name>Push Servlet</servlet-name>-->
-		<!--<servlet-class>org.primefaces.push.PushServlet</servlet-class>-->
-		<!--<async-supported>true</async-supported>-->
-	<!--</servlet>-->
-	<!--<servlet-mapping>-->
-		<!--<servlet-name>Push Servlet</servlet-name>-->
-		<!--<url-pattern>/primepush/*</url-pattern>-->
-	<!--</servlet-mapping>-->
-	<!---->
+	<servlet>
+		<servlet-name>Push Servlet</servlet-name>
+		<servlet-class>org.primefaces.push.PushServlet</servlet-class>
+		<init-param>
+		 	<param-name>org.atmosphere.cpr.broadcasterCacheClass</param-name>
+			<param-value>org.atmosphere.cache.UUIDBroadcasterCache</param-value>
+		</init-param>
+		<init-param>
+             <param-name>org.atmosphere.annotation.packages</param-name>
+             <param-value>org.primefaces.push</param-value>
+		</init-param>
+		<init-param>
+             <param-name>org.atmosphere.cpr.packages</param-name>
+             <param-value>by.cs.web.res</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+		<async-supported>true</async-supported>
+	</servlet>
+	<servlet-mapping>
+        <servlet-name>Push Servlet</servlet-name>
+        <url-pattern>/primepush/*</url-pattern>
+     </servlet-mapping>
+	<context-param>
+		<param-name>primefaces.PUSH_SERVER_URL</param-name>
+		<param-value>http://localhost:8080</param-value>
+	</context-param>
+		<!---->
 	<welcome-file-list>
         <welcome-file>index.xhtml</welcome-file>
         <welcome-file>index.jsp</welcome-file>

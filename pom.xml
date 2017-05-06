@@ -18,9 +18,9 @@
 	<dependencies>
 		<!-- JETTY -->
 		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-webapp</artifactId>
-			<version>9.4.4.v20170414</version>
+			<groupId>org.eclipse.jetty.aggregate</groupId>
+			<artifactId>jetty-all</artifactId>
+			<version>9.4.5.v20170502</version>
 		</dependency>
 		<!-- JSF -->
 		<dependency>
@@ -71,18 +71,18 @@
 			<artifactId>javax.el</artifactId>
 			<version>3.0.0</version>
 		</dependency>
+		<!--It was necessary for Primeface EventBus!!!!!!!!!!!!!!-->
+		<dependency>
+			<groupId>javax.inject</groupId>
+			<artifactId>javax.inject</artifactId>
+			<version>1</version>
+		</dependency>
 		<!--For PrimeFaces Push !!! -->
 		<dependency>
 			<groupId>org.atmosphere</groupId>
 			<artifactId>atmosphere-runtime</artifactId>
 			<version>2.4.9</version>
 		</dependency>
-		<!-- For Atmosphere annotation-->
-		<!--<dependency>-->
-			<!--<groupId>eu.infomas</groupId>-->
-			<!--<artifactId>annotation-detector</artifactId>-->
-			<!--<version>3.0.5</version>-->
-		<!--</dependency>-->
 		<!--WEB CAM-->
 		<dependency>
 			<groupId>com.github.sarxos</groupId>

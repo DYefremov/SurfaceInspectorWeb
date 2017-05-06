@@ -1,4 +1,4 @@
-package by.cs.web;
+package by.cs.web.res;
 
 import by.cs.Constants;
 import org.primefaces.push.annotation.OnMessage;

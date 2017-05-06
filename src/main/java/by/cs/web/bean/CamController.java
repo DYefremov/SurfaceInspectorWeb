@@ -16,6 +16,7 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.context.FacesContext;
 import javax.faces.event.PhaseId;
 import javax.imageio.ImageIO;
+import javax.inject.Inject;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -34,7 +35,8 @@ import java.util.concurrent.TimeUnit;
 @ApplicationScoped
 public class CamController implements Serializable {
 
-    private StreamedContent content;
+    //Temporary for testing
+    private volatile int count;
     private List<Webcam> webcams;
     private Webcam webcam;
     private BufferedImage mainImage;
@@ -55,6 +57,14 @@ public class CamController implements Serializable {
             webcam = Webcam.getDefault();
         }
         serverController = new ServerController();
+    }
+
+    public int getCount() {
+        return count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
     }
 
     public StreamedContent getContent() {
@@ -78,6 +88,7 @@ public class CamController implements Serializable {
      */
     public void start() {
 
+        /*
         if (webcam == null) {
             logger.error("No camera!");
             return;
@@ -89,8 +100,6 @@ public class CamController implements Serializable {
         }
 
         webcam.open();
-        RequestContext context = RequestContext.getCurrentInstance();
-        context.getAttributes().putIfAbsent("camform", "cam");
 
         Thread thread = new Thread(() -> {
             while (isRunning = true) {
@@ -109,6 +118,8 @@ public class CamController implements Serializable {
 
         thread.setDaemon(true);
         thread.start();
+        */
+        isRunning = true;
         //Execute every 2s.
         final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
         executorService.scheduleAtFixedRate(() -> {
@@ -187,8 +198,9 @@ public class CamController implements Serializable {
      * Updating cam form with Pimefaces Push
      */
     public void updateImg() {
-        System.out.println("Publish!");
-//        EventBus eventBus = EventBusFactory.getDefault().eventBus();
-//        eventBus.publish(Constants.CAM_RESOURCE, "message" );
+
+        count++;
+        EventBus eventBus = EventBusFactory.getDefault().eventBus();
+        eventBus.publish(Constants.CAM_RESOURCE, String.valueOf(count));
     }
 }
