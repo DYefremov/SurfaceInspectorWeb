@@ -2,7 +2,6 @@ package by.cs.web.bean;
 
 import by.cs.Constants;
 import com.github.sarxos.webcam.Webcam;
-import org.primefaces.context.RequestContext;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
 import org.primefaces.push.EventBus;
@@ -16,7 +15,6 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.context.FacesContext;
 import javax.faces.event.PhaseId;
 import javax.imageio.ImageIO;
-import javax.inject.Inject;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -35,12 +33,10 @@ import java.util.concurrent.TimeUnit;
 @ApplicationScoped
 public class CamController implements Serializable {
 
-    //Temporary for testing
-    private volatile int count;
+    private volatile BufferedImage mainImage;
+    private volatile boolean isRunning;
     private List<Webcam> webcams;
     private Webcam webcam;
-    private BufferedImage mainImage;
-    private boolean isRunning;
     private ServerController serverController;
 
     private static final Logger logger = LoggerFactory.getLogger(CamController.class);
@@ -57,14 +53,6 @@ public class CamController implements Serializable {
             webcam = Webcam.getDefault();
         }
         serverController = new ServerController();
-    }
-
-    public int getCount() {
-        return count;
-    }
-
-    public void setCount(int count) {
-        this.count = count;
     }
 
     public StreamedContent getContent() {
@@ -88,7 +76,6 @@ public class CamController implements Serializable {
      */
     public void start() {
 
-        /*
         if (webcam == null) {
             logger.error("No camera!");
             return;
@@ -118,8 +105,6 @@ public class CamController implements Serializable {
 
         thread.setDaemon(true);
         thread.start();
-        */
-        isRunning = true;
         //Execute every 2s.
         final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
         executorService.scheduleAtFixedRate(() -> {
@@ -199,8 +184,7 @@ public class CamController implements Serializable {
      */
     public void updateImg() {
 
-        count++;
         EventBus eventBus = EventBusFactory.getDefault().eventBus();
-        eventBus.publish(Constants.CAM_RESOURCE, String.valueOf(count));
+        eventBus.publish(Constants.CAM_RESOURCE, "");
     }
 }

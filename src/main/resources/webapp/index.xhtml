@@ -42,9 +42,9 @@
 						<h:panelGrid columns="1" cellpadding="5">
 
 							<h:form id="camform">
-								<h:outputText id="cam" value="Counter value #{camController.count}" />
-								<!--<p:photoCam widgetVar="pc" listener="#{serverController.onCapture}" />-->
-								<p:graphicImage value="#{camController.content}" cache="false" />
+								<h:form id="cam">
+									<p:graphicImage value="#{camController.content}" cache="false" />
+								</h:form>
 							</h:form>
 							<!--Push !!!!!!!-->
 							<p:socket channel="/updateCam">
