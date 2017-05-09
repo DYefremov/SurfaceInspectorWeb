@@ -1,6 +1,9 @@
 package by.cs.web.bean;
 
 import by.cs.Constants;
+import by.cs.cam.CamService;
+import by.cs.cam.DefaultCamService;
+import by.cs.cam.ImageProcessor;
 import com.github.sarxos.webcam.Webcam;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
@@ -14,12 +17,8 @@ import javax.faces.bean.ApplicationScoped;
 import javax.faces.bean.ManagedBean;
 import javax.faces.context.FacesContext;
 import javax.faces.event.PhaseId;
-import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -30,14 +29,13 @@ import java.util.concurrent.TimeUnit;
  * @author Dmitriy V.Yefremov
  */
 @ManagedBean
-@ApplicationScoped
 public class CamController implements Serializable {
 
     private volatile BufferedImage mainImage;
+    private volatile int updateTime;
     private volatile boolean isRunning;
-    private List<Webcam> webcams;
-    private Webcam webcam;
-    private ServerController serverController;
+    private ImageProcessor imageProcessor;
+    private CamService camService;
 
     private static final Logger logger = LoggerFactory.getLogger(CamController.class);
 
@@ -47,12 +45,8 @@ public class CamController implements Serializable {
 
     @PostConstruct
     public void init() {
-        //Init web cams
-        if (!Webcam.getWebcams().isEmpty()) {
-            webcams = Webcam.getWebcams();
-            webcam = Webcam.getDefault();
-        }
-        serverController = new ServerController();
+        camService = DefaultCamService.getInstance();
+        imageProcessor = new ImageProcessor(mainImage);
     }
 
     public StreamedContent getContent() {
@@ -64,11 +58,15 @@ public class CamController implements Serializable {
     }
 
     public List<Webcam> getWebcams() {
-        return webcams;
+        return (List<Webcam>) camService.getCams();
     }
 
-    public void setWebcams(List<Webcam> webcams) {
-        this.webcams = webcams;
+    public int getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(int updateTime) {
+        this.updateTime = updateTime;
     }
 
     /**
@@ -76,21 +74,11 @@ public class CamController implements Serializable {
      */
     public void start() {
 
-        if (webcam == null) {
-            logger.error("No camera!");
-            return;
-        }
-
-        if (webcam.isOpen()) {
-            logger.info("Camera is already running!");
-            return;
-        }
-
-        webcam.open();
+        camService.start();
 
         Thread thread = new Thread(() -> {
             while (isRunning = true) {
-                mainImage = webcam.getImage();
+                mainImage = (BufferedImage) camService.getImage();
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
@@ -119,14 +107,8 @@ public class CamController implements Serializable {
      * Stops camera
      */
     public void stop() {
-
         isRunning = false;
-
-        if (webcam != null) {
-            webcam.close();
-            Webcam.shutdown();
-            logger.info("Camera stopped!");
-        }
+        camService.stop();
     }
 
     /**
@@ -137,46 +119,13 @@ public class CamController implements Serializable {
         if (image == null) {
             return;
         }
-
-        BufferedImage grayImage = new BufferedImage(image.getWidth(), image.getHeight(),
-                BufferedImage.TYPE_BYTE_GRAY);
-        Graphics graphics = grayImage.getGraphics();
-        graphics.drawImage(image, 0, 0, null);
-        graphics.dispose();
-
-        int pixels[] = image.getRGB(0, 0, 1, image.getHeight(), null, 0, 1);
-
-        if (serverController != null) {
-            serverController.setData(pixels);
-        }
     }
 
     /**
      * @return image bytes
      */
     private byte[] getBytes() {
-
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-
-        if (mainImage == null) {
-            return bos.toByteArray();
-        }
-
-        int w = mainImage.getWidth(null);
-        int h = mainImage.getHeight(null);
-        int scale = 2;
-
-        BufferedImage image = new BufferedImage(w * scale, h * scale, BufferedImage.TYPE_INT_ARGB);
-        Graphics g = image.getGraphics();
-        g.drawImage(mainImage, 10, 10, w * scale, h * scale, null);
-
-        try {
-            ImageIO.write(image, "png", bos);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return bos.toByteArray();
+       return imageProcessor.getImageBytes(mainImage);
     }
 
     /**

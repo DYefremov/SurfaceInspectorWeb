@@ -28,7 +28,7 @@
 							<p:commandButton value="Start service" icon="ui-icon-start" />
 						</f:facet>
 						<f:facet name="right">
-							<p:commandButton value="Stop service" actionListener="#{serverController.stopService}" ajax="false" icon="ui-icon-close" />
+							<p:commandButton value="Stop service" actionListener="#{serverController.stopService}" icon="ui-icon-close" />
 						</f:facet>
 					</p:toolbar>
 				</p:layoutUnit>
@@ -53,8 +53,8 @@
 						</h:panelGrid>
 						<h:panelGrid columns="2" cellpadding="5">
 							<p:outputLabel for="cams" value="Available cameras: " />
-							<p:selectOneListbox id="cams" value="#{camController.webcams}">
-								<f:selectItems value="#{camController.webcams}" var="webcam" itemLabel="#{webcam.name}"/>
+							<p:selectOneListbox id="cams" values="#{camController.getWebcams}">
+								<!--<f:selectItems value="#{camController.getWebcams}" var="webcam" itemLabel="#{webcam.name}"/>-->
 							</p:selectOneListbox>
 						</h:panelGrid>
 						<h:panelGrid columns="2" cellpadding="5">
@@ -65,14 +65,52 @@
 								<p:commandButton value="Stop" actionListener="#{camController.stop}" ajax="true" async="true"/>
 							</h:column>
 						</h:panelGrid>
+						<br />
+						<br />
+						<h:panelGrid columns="2" cellpadding="5" style="margin-left: 20px">
+							<h:column >
+								<p:outputLabel id="camtime" value="#{camController.updateTime}" />
+								<p:slider for="camtime" type="vertical" display="camtime"/>
+							</h:column>
+							<h:column>
+								<!--<p:slider  type="vertical" />-->
+							</h:column>
+						</h:panelGrid>
 					</h:form>
-
 				</p:layoutUnit>
 
-				<p:layoutUnit position="east" size="200" header="Cpu" resizable="true" closable="false" collapsible="true" >
+				<p:layoutUnit position="east" size="20%" header="Cpu" resizable="true" closable="false" collapsible="true" >
 					<p:growl id="growl" life="2000" />
-					<p:commandButton value="Test" actionListener="#{cpuTest.test}" update="growl" />
-					<p:commandButton value="Shutdown" actionListener="#{serverController.stopService}" ajax="true" async="true"/>
+					<h:panelGrid columns="2" cellpadding="5">
+						<h:outputLabel value="IP:" />
+						<p:inputText value="127.0.0.1" />
+					</h:panelGrid>
+					<h:panelGrid columns="4" cellpadding="5">
+						<h:outputLabel value="Rack:" />
+						<!--Sets only digits and 1 didits max-->
+						<p:inputMask value="0" mask="9" size="2"/>
+						<h:outputLabel value="Slot:" />
+						<p:inputMask value="2" mask="9" size="2"/>
+					</h:panelGrid>
+
+					<h:panelGrid columns="2" cellpadding="5">
+						<p:selectBooleanButton value="#{cpuTest.connect}" onLabel="Connect" offLabel="Disconnect" onIcon="ui-icon-check" offIcon="ui-icon-close" style="width:150px">
+							<p:ajax update="growl" listener="#{cpuTest.connectTest}" />
+						</p:selectBooleanButton>
+						<p:commandButton value="Cpu info" actionListener="#{cpuTest.test}" update="growl" />
+					</h:panelGrid>
+
+					<p:separator />
+					<h:panelGrid columns="2" cellpadding="5">
+						<h:outputLabel value="Set variable to change: " />
+						<p:inputText value="#{cpuTest.value}" size="5"/>
+					</h:panelGrid>
+					<p:separator />
+															<!--Displays element at the bottom-->
+					<h:panelGrid columns="2" cellpadding="5" style="position: absolute; left: 0; bottom: 0; right: 0;">
+						<h:outputLabel value="Cpu status: " />
+						<p:outputLabel id="status" value="#{cpuTest.status}" />
+					</h:panelGrid>
 				</p:layoutUnit>
 
 				<p:layoutUnit position="center" header="Chart">
