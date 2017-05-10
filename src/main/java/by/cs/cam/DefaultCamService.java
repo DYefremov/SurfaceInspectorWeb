@@ -4,14 +4,14 @@ import com.github.sarxos.webcam.Webcam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.image.RenderedImage;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author Dmitriy V.Yefremov
  */
-public class DefaultCamService  implements CamService {
+public class DefaultCamService  implements CamService<BufferedImage> {
 
     private boolean isRunning;
     private List<Webcam> webcams;
@@ -87,7 +87,9 @@ public class DefaultCamService  implements CamService {
     }
 
     @Override
-    public RenderedImage getImage() {
+    public BufferedImage getImage() {
         return webcam != null ? webcam.getImage() : null;
     }
+
+
 }

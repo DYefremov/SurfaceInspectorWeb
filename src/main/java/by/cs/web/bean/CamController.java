@@ -13,8 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
-import javax.faces.bean.ApplicationScoped;
-import javax.faces.bean.ManagedBean;
+import javax.faces.bean.*;
 import javax.faces.context.FacesContext;
 import javax.faces.event.PhaseId;
 import java.awt.image.BufferedImage;
@@ -29,13 +28,19 @@ import java.util.concurrent.TimeUnit;
  * @author Dmitriy V.Yefremov
  */
 @ManagedBean
+@ApplicationScoped
 public class CamController implements Serializable {
 
     private volatile BufferedImage mainImage;
-    private volatile int updateTime;
+    private volatile int updateTime = 1;
     private volatile boolean isRunning;
     private ImageProcessor imageProcessor;
-    private CamService camService;
+    private CamService<BufferedImage> camService;
+    private EventBus eventBus;
+    private ScheduledExecutorService executorService;
+
+    @ManagedProperty(value = "#{serverController}")
+    private ServerController serverController;
 
     private static final Logger logger = LoggerFactory.getLogger(CamController.class);
 
@@ -46,7 +51,17 @@ public class CamController implements Serializable {
     @PostConstruct
     public void init() {
         camService = DefaultCamService.getInstance();
-        imageProcessor = new ImageProcessor(mainImage);
+        imageProcessor = new ImageProcessor();
+        eventBus = EventBusFactory.getDefault().eventBus();
+
+    }
+
+    public ServerController getServerController() {
+        return serverController;
+    }
+
+    public void setServerController(ServerController serverController) {
+        this.serverController = serverController;
     }
 
     public StreamedContent getContent() {
@@ -74,16 +89,16 @@ public class CamController implements Serializable {
      */
     public void start() {
 
+        if (isRunning) {
+            return;
+        }
+
         camService.start();
+        isRunning = true;
 
         Thread thread = new Thread(() -> {
-            while (isRunning = true) {
-                mainImage = (BufferedImage) camService.getImage();
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+            while (isRunning) {
+                mainImage =  camService.getImage();
 
                 if ((mainImage) != null) {
                     mainImage.flush();
@@ -94,13 +109,13 @@ public class CamController implements Serializable {
         thread.setDaemon(true);
         thread.start();
         //Execute every 2s.
-        final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+        executorService = Executors.newSingleThreadScheduledExecutor();
         executorService.scheduleAtFixedRate(() -> {
             if (isRunning) {
                 updateImg();
-//                setData(mainImage);
+                setData(mainImage);
             }
-        }, 0, 2, TimeUnit.SECONDS);
+        }, 0, 1, TimeUnit.SECONDS);
     }
 
     /**
@@ -108,6 +123,9 @@ public class CamController implements Serializable {
      */
     public void stop() {
         isRunning = false;
+        if (executorService != null && !executorService.isShutdown()) {
+            executorService.shutdown();
+        }
         camService.stop();
     }
 
@@ -116,8 +134,8 @@ public class CamController implements Serializable {
      */
     private void setData(BufferedImage image) {
 
-        if (image == null) {
-            return;
+        if (image != null) {
+            serverController.setData(imageProcessor.getPreparedData(mainImage));
         }
     }
 
@@ -132,8 +150,6 @@ public class CamController implements Serializable {
      * Updating cam form with Pimefaces Push
      */
     public void updateImg() {
-
-        EventBus eventBus = EventBusFactory.getDefault().eventBus();
-        eventBus.publish(Constants.CAM_RESOURCE, "");
+        eventBus.publish(Constants.CAM_RESOURCE, "message");
     }
 }

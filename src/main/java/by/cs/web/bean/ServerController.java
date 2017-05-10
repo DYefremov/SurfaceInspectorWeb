@@ -3,13 +3,12 @@ package by.cs.web.bean;
 import by.cs.Constants;
 import by.cs.web.StandaloneServer;
 import org.primefaces.context.RequestContext;
-import org.primefaces.model.chart.Axis;
-import org.primefaces.model.chart.AxisType;
 import org.primefaces.model.chart.BarChartModel;
 import org.primefaces.model.chart.ChartSeries;
 
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
+import javax.faces.bean.ApplicationScoped;
 import javax.faces.bean.ManagedBean;
 import javax.faces.context.FacesContext;
 import javax.servlet.ServletContext;
@@ -18,11 +17,12 @@ import java.io.Serializable;
 /**
  * @author Dmitriy V.Yefremov
  */
-@ManagedBean
+@ManagedBean(name = "serverController")
+@ApplicationScoped
 public class ServerController implements Serializable {
 
     private BarChartModel model;
-    private String log = "";
+    private String log = "Log";
 
     public ServerController() {
 
@@ -30,9 +30,7 @@ public class ServerController implements Serializable {
 
     @PostConstruct
     public void init() {
-        initModel();
-        //add values for test
-        setData(new int[] {100, 200, 300, 400 ,500});
+        model = new BarChartModel();
     }
 
     public BarChartModel getModel() {
@@ -71,29 +69,13 @@ public class ServerController implements Serializable {
 
         ChartSeries series = new ChartSeries();
         series.setLabel("Values");
+
         for (int i = 0; i < values.length; i++) {
-            series.set(i, values[i]);
+            int value = values[i]/10000 * -1;
+            series.set(i, value);
         }
 
+        model.clear();
         model.addSeries(series);
     }
-
-    /**
-     *
-     */
-    private void initModel() {
-
-        model = new BarChartModel();
-        model.setTitle("Bar Chart");
-        model.setLegendPosition("ne");
-
-        Axis xAxis = model.getAxis(AxisType.X);
-        xAxis.setLabel("");
-
-        Axis yAxis = model.getAxis(AxisType.Y);
-        yAxis.setLabel("Values");
-        yAxis.setMin(0);
-        yAxis.setMax(1000);
-    }
-
 }

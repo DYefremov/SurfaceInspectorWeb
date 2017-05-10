@@ -12,20 +12,14 @@ import java.io.IOException;
  */
 public class ImageProcessor {
 
-    private BufferedImage image;
-
     public ImageProcessor() {
 
-    }
-
-    public ImageProcessor(BufferedImage image) {
-        this.image = image;
     }
 
     /**
      * @return prepared data
      */
-    public int[] getPreparedData() {
+    public int[] getPreparedData(BufferedImage image) {
 
         if (image == null) {
             return new int[0];

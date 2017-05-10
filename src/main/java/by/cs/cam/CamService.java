@@ -1,12 +1,11 @@
 package by.cs.cam;
 
-import java.awt.image.RenderedImage;
 import java.util.List;
 
 /**
  * @author Dmitriy V.Yefremov
  */
-public interface CamService {
+public interface CamService<T> {
 
     boolean isAvaliable();
 
@@ -16,5 +15,5 @@ public interface CamService {
 
     List<?> getCams();
 
-     RenderedImage  getImage();
+    T getImage();
 }
