@@ -5,7 +5,6 @@ package by.cs.cpu;
  */
 public class CpuS7Connection implements CpuConnection {
 
-
     @Override
     public void connect(Cpu cpu) {
 
@@ -27,7 +26,7 @@ public class CpuS7Connection implements CpuConnection {
     }
 
     @Override
-    public void writeData() {
+    public void writeData(Data data) {
 
     }
 

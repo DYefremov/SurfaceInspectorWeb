@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
  * @author Dmitriy V.Yefremov
  */
 @ManagedBean
-@ApplicationScoped
+@SessionScoped
 public class CamController implements Serializable {
 
     private volatile BufferedImage mainImage;
@@ -39,8 +39,8 @@ public class CamController implements Serializable {
     private EventBus eventBus;
     private ScheduledExecutorService executorService;
 
-    @ManagedProperty(value = "#{serverController}")
-    private ServerController serverController;
+    @ManagedProperty(value = "#{chartController}")
+    private ChartController chartController;
 
     private static final Logger logger = LoggerFactory.getLogger(CamController.class);
 
@@ -56,12 +56,12 @@ public class CamController implements Serializable {
 
     }
 
-    public ServerController getServerController() {
-        return serverController;
+    public ChartController getChartController() {
+        return chartController;
     }
 
-    public void setServerController(ServerController serverController) {
-        this.serverController = serverController;
+    public void setChartController(ChartController chartController) {
+        this.chartController = chartController;
     }
 
     public StreamedContent getContent() {
@@ -135,7 +135,7 @@ public class CamController implements Serializable {
     private void setData(BufferedImage image) {
 
         if (image != null) {
-            serverController.setData(imageProcessor.getPreparedData(mainImage));
+            chartController.setData(imageProcessor.getPreparedData(mainImage));
         }
     }
 

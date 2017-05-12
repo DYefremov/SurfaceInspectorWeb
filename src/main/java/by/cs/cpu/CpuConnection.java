@@ -13,7 +13,7 @@ public interface CpuConnection {
 
     Cpu getCurrentCpu();
 
-    void writeData();
+    void writeData(Data data);
 
     Data getData();
 }

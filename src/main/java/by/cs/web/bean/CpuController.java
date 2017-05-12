@@ -7,14 +7,15 @@ import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
 import java.io.Serializable;
 
-@ManagedBean(name = "cpuTest")
+@ManagedBean(name = "cpuController")
 @SessionScoped
-public class CpuTest implements Serializable {
+public class CpuController implements Serializable {
 
 	private volatile boolean connect;
-	private volatile String value;
+	private volatile String ip = "127.0.0.1";
+	private volatile String variable = "VAR1";
 
-	public CpuTest() {
+	public CpuController() {
 	}
 
 	public boolean isConnect() {
@@ -25,12 +26,24 @@ public class CpuTest implements Serializable {
 		this.connect = connect;
 	}
 
-	public String getValue() {
-		return value;
+	public String getIp() {
+		return ip;
 	}
 
-	public void setValue(String value) {
-		this.value = value;
+	public void setIp(String ip) {
+		this.ip = ip;
+	}
+
+	public String getVariable() {
+		return variable;
+	}
+
+	public void setVariable(String variable) {
+		this.variable = variable;
+	}
+
+	public void apply() {
+		System.out.println("Apply!");
 	}
 
 	public String test() {

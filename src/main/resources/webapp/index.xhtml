@@ -17,11 +17,11 @@
 		<title>SurfaceInspector</title>
 	</h:head>
 
-	<h:body>
-		<h:form>
-			<p:layout fullPage="true" >
+	<h:body >
+		<h:form >
+			<p:layout fullPage="true">
 
-				<p:layoutUnit position="north" >
+				<p:layoutUnit position="north">
 					               <!--For hiding scroll-->
 					<p:toolbar style="overflow:hidden !important">
 						<f:facet name="left">
@@ -33,19 +33,20 @@
 					</p:toolbar>
 				</p:layoutUnit>
 
-				<p:layoutUnit position="south" size="100" header="Logs" resizable="true" closable="false" collapsible="true">
+				<p:layoutUnit position="south" size="100" header="Logs" resizable="true" closable="false" collapsible="true" >
+>
 					<h:outputText id="logs" value="There will be logs!"  widgetVar="logConsole" />
 				</p:layoutUnit>
 
 				<p:layoutUnit position="west" style="min-width:350px;" header="Camera" resizable="true" closable="false" collapsible="true">
-					<h:form >
-						<h:panelGrid columns="1" cellpadding="5">
+					<h:form>
+						<h:panelGrid columns="1" cellpadding="5" >
 							<h:form id="camform" >
-								<p:graphicImage id="cam" value="#{camController.content}" style="width: 300px; height: 240px" cache="false"/>
+								<p:graphicImage id="cam" value="#{camController.content}" style="width: 300px; height: 240px" cache="false" />
 							</h:form>
 							<!--Push !!!!!!!-->
 							<p:socket channel="/updateCam">
-								<p:ajax event="message" update="camform:cam"/>
+								<p:ajax event="message" update="camform:cam" />
 							</p:socket>
 						</h:panelGrid>
 						<h:panelGrid columns="2" cellpadding="5">
@@ -56,19 +57,19 @@
 						</h:panelGrid>
 						<h:panelGrid columns="2" cellpadding="5">
 							<h:column>
-								<p:commandButton value="Start" actionListener="#{camController.start}" ajax="true" async="true"/>
+								<p:commandButton value="Start" actionListener="#{camController.start}" ajax="true" async="true" />
 							</h:column>
 							<h:column>
-								<p:commandButton value="Stop" actionListener="#{camController.stop}" ajax="true" async="true"/>
+								<p:commandButton value="Stop" actionListener="#{camController.stop}" ajax="true" async="true" />
 							</h:column>
 						</h:panelGrid>
 						<br />
 						<br />
 						<h:panelGrid columns="2" cellpadding="5" style="margin-left: 20px">
 							<h:column >
-								<p:outputLabel id="camtimeOut"  />
+								<p:outputLabel id="camtimeOut" />
 								<h:inputHidden id="camtime" value="#{camController.updateTime}" />
-								<p:slider for="camtime" type="vertical" display="camtimeOut" maxValue="10"/>
+								<p:slider for="camtime" type="vertical" display="camtimeOut" maxValue="10" />
 							</h:column>
 							<h:column>
 								<!--<p:slider  type="vertical" />-->
@@ -77,46 +78,49 @@
 					</h:form>
 				</p:layoutUnit>
 
-				<p:layoutUnit position="east" size="25%" header="Cpu" resizable="true" closable="false" collapsible="true" >
+				<p:layoutUnit position="east" size="25%" header="Cpu" resizable="true" closable="false" collapsible="true">
 					<p:growl id="growl" life="2000" />
 					<h:panelGrid columns="2" cellpadding="5">
 						<h:outputLabel value="IP:" />
-						<p:inputText value="127.0.0.1" />
+						<p:inputText value="#{cpuController.ip}" />
 					</h:panelGrid>
 					<h:panelGrid columns="4" cellpadding="5">
 						<h:outputLabel value="Rack:" />
 						<!--Sets only digits and 1 didits max-->
-						<p:inputMask value="0" mask="9" size="2"/>
+						<p:inputMask value="0" mask="9" size="2" />
 						<h:outputLabel value="Slot:" />
-						<p:inputMask value="2" mask="9" size="2"/>
+						<p:inputMask value="2" mask="9" size="2" />
 					</h:panelGrid>
 
-					<h:panelGrid columns="2" cellpadding="5">
-						<p:selectBooleanButton value="#{cpuTest.connect}" onLabel="Connect" offLabel="Disconnect" onIcon="ui-icon-check" offIcon="ui-icon-close" style="width:150px">
-							<p:ajax update="growl" listener="#{cpuTest.connectTest}" />
-						</p:selectBooleanButton>
-						<p:commandButton value="Cpu info" actionListener="#{cpuTest.test}" update="growl" />
-					</h:panelGrid>
-
-					<p:separator />
 					<h:panelGrid columns="2" cellpadding="5">
 						<h:outputLabel value="Set variable to change: " />
-						<p:inputText value="#{cpuTest.value}" size="5"/>
+						<p:inputText value="#{cpuController.variable}" size="5" />
 					</h:panelGrid>
 					<p:separator />
-															<!--Displays element at the bottom-->
+					<h:panelGrid columns="1" cellpadding="5">
+						<p:commandButton value="Apply" actionListener="#{cpuController.apply}" />
+					</h:panelGrid>
+					<p:separator />
+					<h:panelGrid columns="2" cellpadding="5">
+						<p:selectBooleanButton value="#{cpuController.connect}" onLabel="Connect" offLabel="Disconnect" onIcon="ui-icon-check" offIcon="ui-icon-close" style="width:150px">
+							<p:ajax update="growl" listener="#{cpuController.connectTest}" />
+						</p:selectBooleanButton>
+						<p:commandButton value="Cpu info" actionListener="#{cpuController.test}" update="growl"/>
+					</h:panelGrid>
+					<p:separator />
+					<!--Displays element at the bottom-->
 					<h:panelGrid columns="2" cellpadding="5" style="position: absolute; left: 0; bottom: 0; right: 0;">
 						<h:outputLabel value="Cpu status: " />
-						<p:outputLabel id="status" value="#{cpuTest.status}" />
+						<p:outputLabel id="status" value="#{cpuController.status}" />
 					</h:panelGrid>
 				</p:layoutUnit>
 
 				<p:layoutUnit position="center" header="Chart">
 					<h:form id="chartform">
-						<p:chart id="chartbar" type="bar" model="#{serverController.model}" style="height:300px" />
+						<p:chart id="chartbar" type="bar" model="#{chartController.model}" style="height:300px" />
 					</h:form>
 					<p:socket channel="/updateCam">
-						<p:ajax event="message" update="chartform:chartbar"/>
+						<p:ajax event="message" update="chartform:chartbar" />
 					</p:socket>
 				</p:layoutUnit>
 
