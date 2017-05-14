@@ -29,14 +29,13 @@ public class S7ClientTemp {
     private final byte[] PDU = new byte[2048];
     //Default port
     private static final int PORT = 102;
-    private static final int MinPduSize = 16;
-    private static final int DefaultPduSizeRequested = 480;
-    private static final int IsoHSize = 7; // TPKT+COTP Header Size
-    private static final int MaxPduSize = DefaultPduSizeRequested+IsoHSize;
+    private static final int MIN_PDU_SIZE = 16;
+    private static final int DEFAULT_PDU_SIZE_REQUESTED = 480;
+    private static final int ISO_H_SIZE = 7; // TPKT+COTP Header Size
+    private static final int MAX_PDU_SIZE = DEFAULT_PDU_SIZE_REQUESTED + ISO_H_SIZE;
     private static final int TIMEOUT = 2000;
     //Used connection type OP
     private static final short CONNECTION_TYPE = 2;
-
 
     private byte LOCAL_TSAP_HI;
     private byte LOCAL_TSAP_LO;
@@ -46,32 +45,22 @@ public class S7ClientTemp {
 
     /**
      * ISO Connection Request telegram (contains also ISO Header and COTP Header)
+     *
+     *     TPKT (RFC1006 Header)
+     * [0] - RFC 1006 ID (3); [1] - Reserved, always 0; [2] - High part of packet lenght (entire frame, payload and TPDU included);
+     * [3] - Low part of packet lenght (entire frame, payload and TPDU included);
+     *     COTP (ISO 8073 Header)
+     * [4] -  PDU Size Length; [5] - CR - Connection Request ID; [6] - Dst Reference HI; [7] - Dst Reference LO; [8] - Src Reference HI;
+     * [9] - Src Reference LO; [10] - Class + Options Flags; [11] - PDU Max Length ID; [12] -  PDU Max Length HI;
+     * [13] - PDU Max Length LO; [14] - Src TSAP Identifier; [15] - Src TSAP Length (2 bytes);
+     * [16] - Src TSAP HI (will be overwritten); [17] - Src TSAP LO (will be overwritten); [18] - Dst TSAP Identifier;
+     * [19] -  Dst TSAP Length (2 bytes); [20] - Dst TSAP HI (will be overwritten); [21] -  Dst TSAP LO (will be overwritten)
+     *
      */
     private static final byte ISO_CR[] = {
-            // TPKT (RFC1006 Header)
-            (byte)0x03, // RFC 1006 ID (3)
-            (byte)0x00, // Reserved, always 0
-            (byte)0x00, // High part of packet lenght (entire frame, payload and TPDU included)
-            (byte)0x16, // Low part of packet lenght (entire frame, payload and TPDU included)
-            // COTP (ISO 8073 Header)
-            (byte)0x11, // PDU Size Length
-            (byte)0xE0, // CR - Connection Request ID
-            (byte)0x00, // Dst Reference HI
-            (byte)0x00, // Dst Reference LO
-            (byte)0x00, // Src Reference HI
-            (byte)0x01, // Src Reference LO
-            (byte)0x00, // Class + Options Flags
-            (byte)0xC0, // PDU Max Length ID
-            (byte)0x01, // PDU Max Length HI
-            (byte)0x0A, // PDU Max Length LO
-            (byte)0xC1, // Src TSAP Identifier
-            (byte)0x02, // Src TSAP Length (2 bytes)
-            (byte)0x01, // Src TSAP HI (will be overwritten)
-            (byte)0x00, // Src TSAP LO (will be overwritten)
-            (byte)0xC2, // Dst TSAP Identifier
-            (byte)0x02, // Dst TSAP Length (2 bytes)
-            (byte)0x01, // Dst TSAP HI (will be overwritten)
-            (byte)0x02  // Dst TSAP LO (will be overwritten)
+            (byte)0x03, (byte)0x00, (byte)0x00, (byte)0x16, (byte)0x11, (byte)0xE0, (byte)0x00, (byte)0x00, (byte)0x00,
+            (byte)0x01, (byte)0x00, (byte)0xC0, (byte)0x01, (byte)0x0A, (byte)0xC1, (byte)0x02, (byte)0x01,
+            (byte)0x00, (byte)0xC2, (byte)0x02, (byte)0x01, (byte)0x02
     };
 
     private static final Logger logger = LoggerFactory.getLogger(S7ClientTemp.class);
@@ -149,10 +138,10 @@ public class S7ClientTemp {
     private boolean isoConnect() {
 
         int size;
-        ISO_CR[16]= LOCAL_TSAP_HI;
-        ISO_CR[17]= LOCAL_TSAP_LO;
-        ISO_CR[20]= REMOTE_TSAP_HI;
-        ISO_CR[21]= REMOTE_TSAP_LO;
+        ISO_CR[16] = LOCAL_TSAP_HI;
+        ISO_CR[17] = LOCAL_TSAP_LO;
+        ISO_CR[20] = REMOTE_TSAP_HI;
+        ISO_CR[21] = REMOTE_TSAP_LO;
         // Sends the connection request telegram
         sendPacket(ISO_CR, ISO_CR.length);
 
@@ -163,7 +152,6 @@ public class S7ClientTemp {
 
         return false;
     }
-
 
     /**
      * @param buffer
@@ -180,7 +168,6 @@ public class S7ClientTemp {
         }
     }
 
-
     /**
      * @return
      */
@@ -196,10 +183,10 @@ public class S7ClientTemp {
             if (!hasError) {
                 size= S7.GetWordAt(PDU,2);
                 // Check 0 bytes Data Packet (only TPKT+COTP = 7 bytes)
-                if (size == IsoHSize) {
+                if (size == ISO_H_SIZE) {
                     recvPacket(PDU,4, 3); // Skip remaining 3 bytes and Done is still false
                 } else {
-                    if ((size > MaxPduSize) || (size < MinPduSize))
+                    if ((size > MAX_PDU_SIZE) || (size < MIN_PDU_SIZE))
                        hasError = true;
                     else
                         done = true; // a valid Length !=7 && >16 && <247
@@ -211,7 +198,7 @@ public class S7ClientTemp {
             recvPacket(PDU,4, 3); // Skip remaining 3 COTP bytes
             lastPduType =PDU[5];   // Stores PDU Type, we need it
             // Receives the S7 Payload
-            recvPacket(PDU, 7, size - IsoHSize);
+            recvPacket(PDU, 7, size - ISO_H_SIZE);
         }
 
         return !hasError ? size : 0;
