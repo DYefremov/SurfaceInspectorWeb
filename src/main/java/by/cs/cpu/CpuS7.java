@@ -42,4 +42,13 @@ public class CpuS7 implements Cpu {
     public void setIp(String ip) {
         Ip = ip;
     }
+
+    @Override
+    public String toString() {
+        return "CpuS7{" +
+                "rack=" + rack +
+                ", slot=" + slot +
+                ", Ip='" + Ip + '\'' +
+                '}';
+    }
 }

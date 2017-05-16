@@ -1,6 +1,11 @@
 package by.cs.web.bean;
 
 
+import by.cs.cpu.CpuConnection;
+import by.cs.cpu.CpuS7;
+import by.cs.cpu.CpuS7Connection;
+
+import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
@@ -12,26 +17,18 @@ import java.io.Serializable;
 public class CpuController implements Serializable {
 
 	private volatile boolean connect;
-	private volatile String ip = "127.0.0.1";
-	private volatile String variable = "VAR1";
+	private String variable;
+	private CpuS7 cpuS7;
+	private CpuConnection cpuConnection;
 
 	public CpuController() {
+
 	}
 
-	public boolean isConnect() {
-		return connect;
-	}
-
-	public void setConnect(boolean connect) {
-		this.connect = connect;
-	}
-
-	public String getIp() {
-		return ip;
-	}
-
-	public void setIp(String ip) {
-		this.ip = ip;
+	@PostConstruct
+	private void init() {
+		cpuS7 = new CpuS7(0, 2, "127.0.0.1");
+		cpuConnection = new CpuS7Connection(cpuS7);
 	}
 
 	public String getVariable() {
@@ -42,19 +39,43 @@ public class CpuController implements Serializable {
 		this.variable = variable;
 	}
 
-	public void apply() {
-		System.out.println("Apply!");
+	public CpuS7 getCpuS7() {
+		return cpuS7;
 	}
 
-	public String test() {
-		FacesMessage message = new FacesMessage(FacesMessage.SEVERITY_INFO, "Test!!!", null);
+	public void setCpuS7(CpuS7 cpuS7) {
+		this.cpuS7 = cpuS7;
+	}
+
+	public boolean isConnect() {
+		return connect;
+	}
+
+	public void setConnect(boolean connect) {
+		this.connect = connect;
+	}
+
+	public void apply() {
+		System.out.println("Cpu info : " + cpuS7);
+	}
+
+	public String getInfo() {
+		String infoMessage = "Info: \n" + cpuConnection.getInfo();
+		FacesMessage message = new FacesMessage(FacesMessage.SEVERITY_INFO, infoMessage, null);
 		FacesContext.getCurrentInstance().addMessage(null, message);
-		return "Test";
+		return infoMessage;
 	}
 
 	public void connectTest() {
+
 		FacesMessage message = new FacesMessage(FacesMessage.SEVERITY_INFO, !connect ? "Connecting..." : "Disconnecting..", null);
 		FacesContext.getCurrentInstance().addMessage(null, message);
+		if (!connect) {
+			System.out.println(cpuConnection.getCurrentCpu());
+			cpuConnection.connect(cpuS7);
+		} else {
+			cpuConnection.disconnect();
+		}
 	}
 
 	public String getStatus() {

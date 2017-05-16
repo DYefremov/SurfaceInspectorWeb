@@ -3,15 +3,19 @@ package by.cs.cpu;
 /**
  *@author Dmitriy V.Yefremov
  */
-public interface CpuConnection {
+public interface CpuConnection<T> {
 
-    void connect(Cpu cpu);
+    void connect();
+
+    void connect(T  cpu);
 
     void disconnect();
 
     boolean isConnected();
 
-    Cpu getCurrentCpu();
+    T getCurrentCpu();
+
+    Object getInfo();
 
     void writeData(Data data);
 

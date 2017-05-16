@@ -82,7 +82,7 @@
 					<p:growl id="growl" life="2000" />
 					<h:panelGrid columns="2" cellpadding="5">
 						<h:outputLabel value="IP:" />
-						<p:inputText value="#{cpuController.ip}" />
+						<p:inputText value="#{cpuController.cpuS7.ip}" />
 					</h:panelGrid>
 					<h:panelGrid columns="4" cellpadding="5">
 						<h:outputLabel value="Rack:" />
@@ -105,7 +105,7 @@
 						<p:selectBooleanButton value="#{cpuController.connect}" onLabel="Connect" offLabel="Disconnect" onIcon="ui-icon-check" offIcon="ui-icon-close" style="width:150px">
 							<p:ajax update="growl" listener="#{cpuController.connectTest}" />
 						</p:selectBooleanButton>
-						<p:commandButton value="Cpu info" actionListener="#{cpuController.test}" update="growl"/>
+						<p:commandButton value="Info" actionListener="#{cpuController.getInfo}" update="growl"/>
 					</h:panelGrid>
 					<p:separator />
 					<!--Displays element at the bottom-->
