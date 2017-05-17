@@ -13,8 +13,8 @@ import java.net.SocketAddress;
 
 
 /**
- * Implementation of s7 client based on
- * project Moka7 by David Nardella
+ * Implementation of s7 client based on S7Client class
+ * from project Moka7 by David Nardella
  * @see "http://snap7.sourceforge.net/"
  *
  * @author Dmitriy V.Yefremov
@@ -71,7 +71,6 @@ public class S7Client {
      * Connect to CPU
      */
     public void connect() {
-
         //Set connection parameters
         int remoteTSAP=(CONNECTION_TYPE<<8) + (cpu.getRack() * 0x20) + cpu.getSlot();
         int locTSAP = 0x0100 & 0x0000FFFF;
@@ -133,25 +132,6 @@ public class S7Client {
         }
     }
 
-
-    private boolean isoConnect() {
-
-        int size;
-        S7Requests.ISO_CR[16] = LOCAL_TSAP_HI;
-        S7Requests.ISO_CR[17] = LOCAL_TSAP_LO;
-        S7Requests.ISO_CR[20] = REMOTE_TSAP_HI;
-        S7Requests.ISO_CR[21] = REMOTE_TSAP_LO;
-        // Sends the connection request telegram
-        sendPacket(S7Requests.ISO_CR, S7Requests.ISO_CR.length);
-
-        if (!hasError) {
-            size = receivePacket();
-            return size == 22 && lastPduType !=(byte)0xD0;
-        }
-
-        return false;
-    }
-
     /**
      * @param buffer
      */
@@ -164,6 +144,11 @@ public class S7Client {
      * @param length
      */
     private void sendPacket(byte[] buffer, int length) {
+
+        if (outputStream == null) {
+            logger.error("S7Client error [sendPacket]: output is null.");
+            return;
+        }
 
         try {
             outputStream.write(buffer, 0 , length);
@@ -179,10 +164,10 @@ public class S7Client {
      */
     private int receivePacket() {
 
-        boolean done = false;
         int size = 0;
+        boolean done = false;
 
-        while ((!hasError) && !done) {
+        while (!hasError && !done) {
             // Get TPKT (4 bytes)
             receivePacket(PDU, 0, 4);
 
@@ -190,19 +175,21 @@ public class S7Client {
                 size= S7.getWordAt(PDU,2);
                 // Check 0 bytes data Packet (only TPKT+COTP = 7 bytes)
                 if (size == ISO_H_SIZE) {
-                    receivePacket(PDU,4, 3); // Skip remaining 3 bytes and Done is still false
+                    // Skip remaining 3 bytes and Done is still false
+                    receivePacket(PDU,4, 3);
                 } else {
-                    if ((size > MAX_PDU_SIZE) || (size < MIN_PDU_SIZE))
-                       hasError = true;
-                    else
-                        done = true; // a valid Length !=7 && >16 && <247
+                    // a valid Length !=7 && >16 && <247
+                    hasError = (size > MAX_PDU_SIZE) || (size < MIN_PDU_SIZE);
+                    done = !hasError;
                 }
             }
         }
 
         if (!hasError) {
-            receivePacket(PDU,4, 3); // Skip remaining 3 COTP bytes
-            lastPduType =PDU[5];   // Stores PDU Type, we need it
+            // Skip remaining 3 COTP bytes
+            receivePacket(PDU, 4, 3);
+            // Stores PDU Type, we need it
+            lastPduType = PDU[5];
             // Receives the S7 Payload
             receivePacket(PDU, 7, size - ISO_H_SIZE);
         }
@@ -218,13 +205,14 @@ public class S7Client {
      */
     private void receivePacket(byte[] Buffer, int start, int size) {
 
-        int bytesRead=0;
+        int bytesRead = 0;
         getData(size, TIMEOUT);
 
         if (!hasError) {
             try {
                 bytesRead = inputStream.read(Buffer, start, size);
-            } catch (IOException ex) {
+            } catch (IOException e) {
+                logger.error("S7Client error [receivePacket]: " + e);
                 hasError = true;
             }
             hasError = bytesRead == 0;
@@ -237,12 +225,18 @@ public class S7Client {
      */
     private void getData(int size, int timeout) {
 
+        if (inputStream == null) {
+            hasError = true;
+            logger.error("S7Client error [getData]: input is null");
+            return;
+        }
+
         int cnt = 0;
-        hasError=false;
+        hasError = false;
         int availableSize;
         boolean expired = false;
 
-        try  {
+        try {
             availableSize = inputStream.available();
 
             while ((availableSize < size) && (!expired) && !hasError) {
@@ -251,22 +245,29 @@ public class S7Client {
                     Thread.sleep(1);
                 } catch (InterruptedException e) {
                     hasError = true;
+                    logger.error("S7Client error [getData]: " + e);
                 }
-                availableSize=inputStream.available();
+                availableSize = inputStream.available();
                 expired = cnt > timeout;
                 // If timeout we clean the buffer
-                if (expired && (availableSize>0) && !hasError) {
+                if (expired && (availableSize > 0) && !hasError) {
                     inputStream.read(PDU, 0, availableSize);
                 }
             }
         } catch (IOException e) {
             hasError = true;
+            logger.error("S7Client error [getData]: " + e);
         }
 
         hasError = cnt >= timeout ? true : false;
     }
 
-
+    /**
+     * @param id
+     * @param index
+     * @param szl
+     * @return
+     */
     public int readSZL(int id, int index, S7Szl szl) {
 
         int error = 0;
@@ -275,8 +276,8 @@ public class S7Client {
         int offset = 0;
         boolean done = false;
         boolean first = true;
-        byte seqIn =0x00;
-        int seqOut =0x0000;
+        byte seqIn = 0x00;
+        int seqOut = 0x0000;
 
         szl.setDataSize(0);
 
@@ -292,62 +293,52 @@ public class S7Client {
                 sendPacket(S7Requests.S7_SZL_NEXT);
             }
 
-            if (error!=0) {
+            if (error != 0) {
                 return error;
             }
 
-            length= receivePacket();
+            length = receivePacket();
 
-            if (error==0) {
+            if (error == 0) {
                 if (first) {
                     // the minimum expected
-                    if (length > 32) {
-                        if ((S7.getWordAt(PDU,27)==0) && (PDU[29]==(byte)0xFF)) {
-                            // Gets Amount of this slice
-                            dataSZL=S7.getWordAt(PDU,31)-8; // Skips extra params (ID, index ...)
-                            done=PDU[26]==0x00;
-                            seqIn=(byte)PDU[24]; // Slice sequence
-
-                            szl.setLenThdr(S7.getWordAt(PDU, 37));
-                            szl.setnDr(S7.getWordAt(PDU, 39));
-                            szl.copy(PDU, 41, offset, dataSZL);
-                            offset += dataSZL;
-                            szl.setDataSize(szl.getDataSize() + dataSZL);
-                        } else {
-                            error = -1;
-                        }
+                    if (length > 32 && (S7.getWordAt(PDU,27) == 0) && (PDU[29] == (byte)0xFF)) {
+                        dataSZL=S7.getWordAt(PDU, 31) - 8;
+                        done = PDU[26] == 0x00;
+                        seqIn = (byte)PDU[24];
+                        szl.setLenThdr(S7.getWordAt(PDU, 37));
+                        szl.setnDr(S7.getWordAt(PDU, 39));
+                        szl.copy(PDU, 41, offset, dataSZL);
+                        offset += dataSZL;
+                        szl.setDataSize(szl.getDataSize() + dataSZL);
                     } else {
                         error = -1;
                     }
-
                 } else {
                     // the minimum expected
-                    if (length > 32) {
-                        if ((S7.getWordAt(PDU,27)==0) && (PDU[29]==(byte)0xFF)) {
-                            // Gets Amount of this slice
-                            dataSZL=S7.getWordAt(PDU,31);
-                            done=PDU[26]==0x00;
-                            seqIn=(byte)PDU[24]; // Slice sequence
-                            szl.copy(PDU, 37, offset, dataSZL);
-                            offset+=dataSZL;
-                            szl.setDataSize(szl.getDataSize() + dataSZL);
-                        } else {
-                            error = -1;
-                        }
+                    if (length > 32 && (S7.getWordAt(PDU,27) == 0) && (PDU[29] == (byte)0xFF)) {
+                        // Gets Amount of this slice
+                        dataSZL = S7.getWordAt(PDU,31);
+                        done = PDU[26] == 0x00;
+                        seqIn = (byte)PDU[24];
+                        szl.copy(PDU, 37, offset, dataSZL);
+                        offset += dataSZL;
+                        szl.setDataSize(szl.getDataSize() + dataSZL);
                     } else {
                         error = -1;
                     }
                 }
             }
-            first=false;
-        }
-
-        while(!done && (error == 0));
+            first = false;
+        } while (!done && (error == 0));
 
         return error;
     }
 
 
+    /**
+     * @return
+     */
     public String getCpInfo() {
 
         StringBuilder sb = new StringBuilder();
@@ -356,7 +347,7 @@ public class S7Client {
         int error = readSZL(0x0131, 0x0001, szl);
         byte[] data = szl.getData();
 
-        if (error ==0) {
+        if (error == 0) {
             int MaxPduLength = S7.getShortAt(data, 2);
             int MaxConnections = S7.getShortAt(data, 4);
             int MaxMpiRate = S7.getDIntAt(data, 6);
@@ -372,4 +363,5 @@ public class S7Client {
 
         return "Error reading info!";
     }
+
 }
