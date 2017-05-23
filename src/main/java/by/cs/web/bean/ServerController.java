@@ -18,18 +18,8 @@ import java.io.Serializable;
 @ApplicationScoped
 public class ServerController implements Serializable {
 
-    private String log = "Log";
-
     public ServerController() {
 
-    }
-
-    public String getLog() {
-        return log;
-    }
-
-    public void setLog(String log) {
-        this.log = log;
     }
 
     /**

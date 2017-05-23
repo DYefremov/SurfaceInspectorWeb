@@ -6,13 +6,14 @@ import org.primefaces.model.chart.ChartSeries;
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
+import java.io.Serializable;
 
 /**
  * @author Dmitriy V.Yefremov
  */
 @ManagedBean
 @SessionScoped
-public class ChartController {
+public class ChartController implements Serializable{
 
     private BarChartModel model;
 

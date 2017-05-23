@@ -5,7 +5,7 @@
 	  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
 	  xmlns:p="http://primefaces.org/ui">
 
-<f:view locale="en" contentType="text/html">
+<f:view locale="en" contentType="text/html" >
 
 	<h:head>
 		<f:facet name="SurfaceInspector">
@@ -33,12 +33,19 @@
 					</p:toolbar>
 				</p:layoutUnit>
 
-				<p:layoutUnit position="south" size="100" header="Logs" resizable="true" closable="false" collapsible="true" >
->
-					<h:outputText id="logs" value="There will be logs!"  widgetVar="logConsole" />
+				<p:layoutUnit position="south" size="25%" header="Logs" resizable="true" closable="false" collapsible="true" >
+					<h:form id="logform" >
+					<!--<pre> for break \r\n characters into new lines!-->
+						<pre>
+							<h:outputText id="logs" value="#{logController.log}"  widgetVar="logConsole" />
+						</pre>
+						<p:socket channel="/updateLog">
+							<p:ajax event="message" update="logform:logs" />
+						</p:socket>
+					</h:form>
 				</p:layoutUnit>
 
-				<p:layoutUnit position="west" style="min-width:350px;" header="Camera" resizable="true" closable="false" collapsible="true">
+				<p:layoutUnit position="west" style="min-width:350px;" header="Camera" resizable="true" closable="false" collapsible="true" >
 					<h:form>
 						<h:panelGrid columns="1" cellpadding="5" >
 							<h:form id="camform" >
@@ -82,7 +89,7 @@
 					<p:growl id="growl" life="2000" />
 					<h:panelGrid columns="2" cellpadding="5">
 						<h:outputLabel value="IP:" />
-						<p:inputText value="#{cpuController.cpuS7.ip}" />
+						<p:inputText value="#{cpuController.cpuS7.ip}" validator="ipValidator" />
 					</h:panelGrid>
 					<h:panelGrid columns="4" cellpadding="5">
 						<h:outputLabel value="Rack:" />
@@ -117,7 +124,7 @@
 
 				<p:layoutUnit position="center" header="Chart">
 					<h:form id="chartform">
-						<p:chart id="chartbar" type="bar" model="#{chartController.model}" style="height:300px" />
+						<p:chart id="chartbar" type="bar" model="#{chartController.model}" style="height: 300px" />
 					</h:form>
 					<p:socket channel="/updateCam">
 						<p:ajax event="message" update="chartform:chartbar" />
