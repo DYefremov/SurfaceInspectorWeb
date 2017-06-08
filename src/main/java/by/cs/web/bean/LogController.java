@@ -10,13 +10,14 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Serializable;
 
 /**
  * @author Dmitriy V.Yefremov
  */
 @ManagedBean(eager = true)
 @SessionScoped
-public class LogController extends WriterAppender {
+public class LogController extends WriterAppender implements Serializable {
 
     private static EventBus eventBus;
     private static final StringBuilder builder = new StringBuilder();

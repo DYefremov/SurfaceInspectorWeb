@@ -22,22 +22,22 @@
 			<p:layout fullPage="true">
 
 				<p:layoutUnit position="north">
-					               <!--For hiding scroll-->
+					<!--For hiding scroll-->
 					<p:toolbar style="overflow:hidden !important">
 						<f:facet name="left">
-							<p:commandButton value="Start service" icon="ui-icon-start" />
+							<p:commandButton value="Start service" icon="ui-icon-play" />
 						</f:facet>
 						<f:facet name="right">
-							<p:commandButton value="Stop service" actionListener="#{serverController.stopService}" icon="ui-icon-close" />
+							<p:commandButton value="Stop service" actionListener="#{serverController.stopService}" icon="ui-icon-power" />
 						</f:facet>
 					</p:toolbar>
 				</p:layoutUnit>
 
 				<p:layoutUnit position="south" size="25%" header="Logs" resizable="true" closable="false" collapsible="true" >
-					<h:form id="logform" >
-					<!--<pre> for break \r\n characters into new lines!-->
+					<h:form id="logform">
+						<!--<pre> for break \r\n characters into new lines!-->
 						<pre>
-							<h:outputText id="logs" value="#{logController.log}"  widgetVar="logConsole" />
+							<h:outputText id="logs" value="#{logController.log}" />
 						</pre>
 						<p:socket channel="/updateLog">
 							<p:ajax event="message" update="logform:logs" />
@@ -46,43 +46,37 @@
 				</p:layoutUnit>
 
 				<p:layoutUnit position="west" style="min-width:350px;" header="Camera" resizable="true" closable="false" collapsible="true" >
-					<h:form>
-						<h:panelGrid columns="1" cellpadding="5" >
-							<h:form id="camform" >
-								<p:graphicImage id="cam" value="#{camController.content}" style="width: 300px; height: 240px" cache="false" />
-							</h:form>
-							<!--Push !!!!!!!-->
-							<p:socket channel="/updateCam">
-								<p:ajax event="message" update="camform:cam" />
-							</p:socket>
-						</h:panelGrid>
-						<h:panelGrid columns="2" cellpadding="5">
-							<p:outputLabel for="cams" value="Available cameras: " />
-							<p:selectOneListbox id="cams" values="#{camController.getWebcams}">
-								<!--<f:selectItems values="#{camController.getWebcams}" var="webcam" itemLabel="#{webcam.name}"/>-->
-							</p:selectOneListbox>
-						</h:panelGrid>
-						<h:panelGrid columns="2" cellpadding="5">
-							<h:column>
-								<p:commandButton value="Start" actionListener="#{camController.start}" ajax="true" async="true" />
-							</h:column>
-							<h:column>
-								<p:commandButton value="Stop" actionListener="#{camController.stop}" ajax="true" async="true" />
-							</h:column>
-						</h:panelGrid>
-						<br />
-						<br />
-						<h:panelGrid columns="2" cellpadding="5" style="margin-left: 20px">
-							<h:column >
-								<p:outputLabel id="camtimeOut" />
-								<h:inputHidden id="camtime" value="#{camController.updateTime}" />
-								<p:slider for="camtime" type="vertical" display="camtimeOut" maxValue="10" />
-							</h:column>
-							<h:column>
-								<!--<p:slider  type="vertical" />-->
-							</h:column>
-						</h:panelGrid>
-					</h:form>
+					<h:panelGrid columns="1" cellpadding="5" >
+						<h:form id="camform" >
+							<p:graphicImage id="cam" value="#{camController.content}" style="width: 300px; height: 240px" cache="false" />
+						</h:form>
+					</h:panelGrid>
+					<h:panelGrid columns="2" cellpadding="5">
+						<p:outputLabel for="cams" value="Available cameras: " />
+						<p:selectOneListbox id="cams" values="#{camController.getWebcams}">
+							<f:selectItems values="#{camController.getWebcams}" var="webcam" itemLabel="#{webcam.name}"/>
+						</p:selectOneListbox>
+					</h:panelGrid>
+					<h:panelGrid columns="2" cellpadding="5">
+						<h:column>
+							<p:commandButton value="Start" icon="ui-icon-play" onclick="PF('camPoll').start()" actionListener="#{camController.start}" ajax="true" async="true" />
+						</h:column>
+						<h:column>
+							<p:commandButton value="Stop" icon="ui-icon-stop" onclick="PF('camPoll').stop()" actionListener="#{camController.stop}" ajax="true" async="true" />
+						</h:column>
+					</h:panelGrid>
+					<br />
+					<br />
+					<h:panelGrid columns="2" cellpadding="5" style="margin-left: 20px">
+						<h:column >
+							<p:outputLabel id="camtimeOut" />
+							<h:inputHidden id="camtime" value="#{camController.updateTime}" />
+							<p:slider for="camtime" type="vertical" display="camtimeOut" maxValue="10" />
+						</h:column>
+						<h:column>
+							<!--<p:slider  type="vertical" />-->
+						</h:column>
+					</h:panelGrid>
 				</p:layoutUnit>
 
 				<p:layoutUnit position="east" size="25%" header="Cpu" resizable="true" closable="false" collapsible="true">
@@ -105,14 +99,14 @@
 					</h:panelGrid>
 					<p:separator />
 					<h:panelGrid columns="1" cellpadding="5">
-						<p:commandButton value="Apply" actionListener="#{cpuController.apply}" />
+						<p:commandButton value="Apply" icon="ui-icon-disk" actionListener="#{cpuController.apply}" />
 					</h:panelGrid>
 					<p:separator />
 					<h:panelGrid columns="2" cellpadding="5">
 						<p:selectBooleanButton value="#{cpuController.connect}" onLabel="Connect" offLabel="Disconnect" onIcon="ui-icon-check" offIcon="ui-icon-close" style="width:150px">
 							<p:ajax update="growl" listener="#{cpuController.connectTest}" />
 						</p:selectBooleanButton>
-						<p:commandButton value="Info" actionListener="#{cpuController.getInfo}" update="growl"/>
+						<p:commandButton value="Info" icon="ui-icon-info" actionListener="#{cpuController.getInfo}" update="growl"/>
 					</h:panelGrid>
 					<p:separator />
 					<!--Displays element at the bottom-->
@@ -122,15 +116,13 @@
 					</h:panelGrid>
 				</p:layoutUnit>
 
-				<p:layoutUnit position="center" header="Chart">
+				<p:layoutUnit position="center" header="Chart" id="chart">
 					<h:form id="chartform">
 						<p:chart id="chartbar" type="bar" model="#{chartController.model}" style="height: 300px" />
 					</h:form>
-					<p:socket channel="/updateCam">
-						<p:ajax event="message" update="chartform:chartbar" />
-					</p:socket>
 				</p:layoutUnit>
-
+				<!--Pool for components update [1s]!!! -->
+				<p:poll interval="1" update="camform:cam chartform:chartbar" widgetVar="camPoll" autoStart="false" />
 			</p:layout>
 		</h:form>
 	</h:body>

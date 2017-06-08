@@ -1,6 +1,5 @@
 package by.cs.web.bean;
 
-import by.cs.Constants;
 import by.cs.cam.CamService;
 import by.cs.cam.DefaultCamService;
 import by.cs.cam.ImageProcessor;
@@ -13,7 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
-import javax.faces.bean.*;
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
+import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
 import javax.faces.event.PhaseId;
 import java.awt.image.BufferedImage;
@@ -53,7 +54,6 @@ public class CamController implements Serializable {
         camService = DefaultCamService.getInstance();
         imageProcessor = new ImageProcessor();
         eventBus = EventBusFactory.getDefault().eventBus();
-
     }
 
     public ChartController getChartController() {
@@ -108,21 +108,22 @@ public class CamController implements Serializable {
 
         thread.setDaemon(true);
         thread.start();
-        //Execute every 2s.
+        //Execute every [updateTime].
         executorService = Executors.newSingleThreadScheduledExecutor();
         executorService.scheduleAtFixedRate(() -> {
             if (isRunning) {
-                updateImg();
                 setData(mainImage);
             }
-        }, 0, 1, TimeUnit.SECONDS);
+        }, 0, updateTime, TimeUnit.SECONDS);
     }
 
     /**
      * Stops camera
      */
     public void stop() {
+
         isRunning = false;
+
         if (executorService != null && !executorService.isShutdown()) {
             executorService.shutdown();
         }
@@ -146,10 +147,4 @@ public class CamController implements Serializable {
        return imageProcessor.getImageBytes(mainImage);
     }
 
-    /**
-     * Updating cam form with Pimefaces Push
-     */
-    public void updateImg() {
-        eventBus.publish(Constants.CAM_RESOURCE, "message");
-    }
 }
